@@ -1,19 +1,19 @@
 "use strict";
-const User = require('../models/user');
+const User = require("../models/user");
 const Boom = require("@hapi/boom");
 
 const Accounts = {
   index: {
     auth: false,
-    handler: function (request, h) {
+    handler: function(request, h) {
       return h.view("main", { title: "Welcome to Donations" });
-    },
+    }
   },
   showSignup: {
     auth: false,
-    handler: function (request, h) {
+    handler: function(request, h) {
       return h.view("signup", { title: "Sign up for Donations" });
-    },
+    }
   },
   signup: {
     auth: false,
@@ -37,13 +37,13 @@ const Accounts = {
       } catch (err) {
         return h.view("signup", { errors: [{ message: err.message }] });
       }
-    },
+    }
   },
   showLogin: {
     auth: false,
-    handler: function (request, h) {
+    handler: function(request, h) {
       return h.view("login", { title: "Login to Donations" });
-    },
+    }
   },
   login: {
     auth: false,
@@ -64,37 +64,40 @@ const Accounts = {
     }
   },
   logout: {
-    auth: false,
-    handler: function (request, h) {
+    handler: function(request, h) {
       request.cookieAuth.clear();
       return h.redirect("/");
-    },
+    }
   },
   showSettings: {
-    handler: function(request, h) {
-      try{
+    handler: async function(request, h) {
+      try {
         const id = request.auth.credentials.id;
         const user = await User.findById(id).lean();
-        return h.view('settings', { title: 'Donation Settings', user: user });
-      } catch(err){
+        return h.view("settings", { title: "Donation Settings", user: user });
+      } catch (err) {
         return h.view("login", { errors: [{ message: err.message }] });
       }
-      
     }
   },
   updateSettings: {
-    handler: function(request, h) {
-      const userEdit = request.payload;
-      const id = request.auth.credentials.id;
-      const user = await User.findById(id);
-      user.firstName = userEdit.firstName;
-      user.lastName = userEdit.lastName;
-      user.email = userEdit.email;
-      user.password = userEdit.password;
-      await user.save();
-      return h.redirect('/settings');
+    handler: async function(request, h) {
+      try{
+        const userEdit = request.payload;
+        const id = request.auth.credentials.id;
+        const user = await User.findById(id);
+        user.firstName = userEdit.firstName;
+        user.lastName = userEdit.lastName;
+        user.email = userEdit.email;
+        user.password = userEdit.password;
+        await user.save();
+        return h.redirect("/settings");
+      }catch(err){
+        return h.view("settings", { errors: [{ message: err.message }] });
+      }
+
     }
-  },
+  }
 };
 
 module.exports = Accounts;

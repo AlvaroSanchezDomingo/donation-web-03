@@ -1,27 +1,24 @@
 "use strict";
 
-const Cookie = require("@hapi/cookie");
 const Hapi = require("@hapi/hapi");
 const Inert = require("@hapi/inert");
 const Vision = require("@hapi/vision");
 const Handlebars = require("handlebars");
+const Cookie = require("@hapi/cookie");
+require('./app/models/db');
 const env = require('dotenv');
 
-
 env.config();
-
-require('./app/models/db');
 
 const server = Hapi.server({
   port: 3000,
   host: "localhost",
 });
 
-
 async function init() {
-  await server.register(Cookie);
   await server.register(Inert);
   await server.register(Vision);
+  await server.register(Cookie);
   server.views({
     engines: {
       hbs: require("handlebars"),
@@ -33,17 +30,15 @@ async function init() {
     layout: true,
     isCached: false,
   });
-
-  server.auth.strategy('session', 'cookie', {
+  server.auth.strategy("session", "cookie", {
     cookie: {
       name: process.env.cookie_name,
       password: process.env.cookie_password,
       isSecure: false
     },
-    redirectTo:'/',
+    redirectTo: "/",
   });
-  server.auth.default('session');
-
+  server.auth.default("session");
   server.route(require("./routes"));
   await server.start();
   console.log(`Server running at: ${server.info.uri}`);
