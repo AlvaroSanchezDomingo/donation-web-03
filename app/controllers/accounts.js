@@ -1,6 +1,7 @@
 "use strict";
 const User = require("../models/user");
 const Boom = require("@hapi/boom");
+const Joi = require('@hapi/joi');
 
 const Accounts = {
   index: {
@@ -17,6 +18,27 @@ const Accounts = {
   },
   signup: {
     auth: false,
+    validate: {
+      payload: {
+        firstName: Joi.string().required(),
+        lastName: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+      },
+      options: {
+        abortEarly: false,
+      },
+      failAction: function (request, h, error) {
+        return h
+          .view("signup", {
+            title: "Sign up error",
+            errors: error.details,
+          })
+          .takeover()
+          .code(400);
+      },
+    },
+
     handler: async function(request, h) {
       try {
         const payload = request.payload;
@@ -47,6 +69,24 @@ const Accounts = {
   },
   login: {
     auth: false,
+    validate: {
+      payload: {
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+      },
+      options: {
+        abortEarly: false,
+      },
+      failAction: function (request, h, error) {
+        return h
+          .view("login", {
+            title: "Sign up error",
+            errors: error.details,
+          })
+          .takeover()
+          .code(400);
+        },
+     },
     handler: async function(request, h) {
       const { email, password } = request.payload;
       try {
@@ -81,6 +121,26 @@ const Accounts = {
     }
   },
   updateSettings: {
+    validate: {
+      payload: {
+        firstName: Joi.string().required(),
+        lastName: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+      },
+      options: {
+        abortEarly: false,
+      },
+      failAction: function (request, h, error) {
+        return h
+          .view("settings", {
+            title: "Sign up error",
+            errors: error.details,
+          })
+          .takeover()
+          .code(400);
+      },
+    },
     handler: async function(request, h) {
       try{
         const userEdit = request.payload;
